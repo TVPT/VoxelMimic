@@ -31,6 +31,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
     public static Boolean voxelGuestMimic = false; //can guests mimic?
     public static HashSet<Integer> unmimicable = new HashSet<Integer>();
     public static int RADIUS = 35;
+    public PermissionValidator permValid;
 
     @Override
     public void onDisable() {
@@ -44,6 +45,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
         readMembers();
         loadConfig();
         PluginDescriptionFile pdfFile = this.getDescription();
+        permValid = new PermissionValidator();
         log.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");
     }
 
@@ -53,8 +55,12 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
         String commandName = command.getName().toLowerCase();
         Player player = (Player) sender;
 
-
         if (commandName.startsWith("mimic") && sender instanceof Player) {
+        	if(permValid.checkPlayerPermissions(player, "voxelmimic.mimic"))
+        	{
+        		player.sendMessage(ChatColor.RED + "You are not permitted to use this command.");
+        		return true;
+        	}
             int radius;
             try {
                 try {
@@ -154,7 +160,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
             File f = new File("plugins/VoxelMimic/mimicconfig.txt");
             if (f.exists()) {
                 Scanner snr = new Scanner(f);
-                int type = 0;
+                //int type = 0; //unused
                 voxelGuest = Boolean.parseBoolean(snr.nextLine().split(":")[1]);
                 voxelGuestMimic = Boolean.parseBoolean(snr.nextLine().split(":")[1]);
                 RADIUS = Integer.parseInt(snr.nextLine().split(":")[1]);
