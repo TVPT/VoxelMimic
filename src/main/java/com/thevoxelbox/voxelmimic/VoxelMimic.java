@@ -32,6 +32,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
     public static HashSet<Integer> unmimicable = new HashSet<Integer>();
     public static int RADIUS = 35;
     public PermissionValidator permValid;
+    public static Boolean usePerms = false;
 
     @Override
     public void onDisable() {
@@ -56,7 +57,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
         Player player = (Player) sender;
 
         if (commandName.startsWith("mimic") && sender instanceof Player) {
-        	if(permValid.checkPlayerPermissions(player, "voxelmimic.mimic"))
+        	if(usePerms && permValid.checkPlayerPermissions(player, "voxelmimic.mimic"))
         	{
         		player.sendMessage(ChatColor.RED + "You are not permitted to use this command.");
         		return true;
@@ -146,6 +147,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
                 for (int id : unmimicable) {
                     pw.write(id + ",");
                 }
+                pw.write("\r\nusePermissions:" + usePerms);
                 pw.close();
                 log.info("[VoxelMimic] Config saved");
             }
@@ -170,6 +172,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
                         unmimicable.add(Integer.parseInt(str));
                     }
                 }
+                usePerms = Boolean.parseBoolean(snr.nextLine().split(":")[1]);
                 snr.close();
                 log.info("[VoxelMimic] Config loaded");
             } else {
