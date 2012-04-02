@@ -9,4 +9,4 @@ commands:
   mimic:
     description: Matches your inventory to types of blocks around you
     usage: |
-           /mimic [optional: radius]
+           /mimic [optional: radius] [optional: sphere]

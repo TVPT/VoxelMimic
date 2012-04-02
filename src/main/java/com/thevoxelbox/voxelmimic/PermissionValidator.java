@@ -19,6 +19,7 @@ public class PermissionValidator {
 				hasPermission = p.hasPermission(s);
 				break;
 			case 1://unused
+				hasPermission = false;
 				break;
 			default:
 				hasPermission = false;

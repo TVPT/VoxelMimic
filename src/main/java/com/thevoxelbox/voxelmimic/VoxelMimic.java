@@ -33,6 +33,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
     public static int RADIUS = 35;
     public PermissionValidator permValid;
     public static Boolean usePerms = false;
+    public static Boolean canSphere = false; //Can use full sphere mimic
 
     @Override
     public void onDisable() {
@@ -63,7 +64,13 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
         		return true;
         	}
             int radius;
+            boolean sphere = false;
             try {
+            	if(canSphere && args.length>1)
+            	{
+            		if(args[1].equalsIgnoreCase("sphere"))
+            			sphere = true;
+            	}
                 try {
                     radius = Integer.parseInt(args[0]);
                     if (voxelGuest && !voxelGuestMimic && !((vGuests.get(player.getName()) == null)) || voxelGuest && voxelGuestMimic || !voxelGuest) {
@@ -71,7 +78,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
                             radius = RADIUS;
                             player.sendMessage(ChatColor.RED + "Radius too large.  Reset to maximum of " + RADIUS);
                         }
-                        performMimic(player, radius);
+                        performMimic(player, radius, sphere);
                         return true;
                     } else {
                         player.sendMessage(ChatColor.RED + "You are not permitted to use this command.");
@@ -79,7 +86,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
                     if (voxelGuest && !voxelGuestMimic && !((vGuests.get(player.getName()) == null)) || (voxelGuest && voxelGuestMimic) || !voxelGuest) {
-                        performMimic(player, RADIUS);
+                        performMimic(player, RADIUS, sphere);
                         player.sendMessage("himom");
                         return true;
                     } else {
@@ -88,7 +95,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
                     }
                 }
             } catch (Exception ex) {
-                player.sendMessage(ChatColor.RED + "Invalid mimic parameters!  /mimic  OR   /mimic [radius]");
+                player.sendMessage(ChatColor.RED + "Invalid mimic parameters!  /mimic  OR   /mimic [radius] OR /mimic [radius] <sphere>");
                 return true;
             }
         }
@@ -148,6 +155,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
                     pw.write(id + ",");
                 }
                 pw.write("\r\nusePermissions:" + usePerms);
+                pw.write("\r\nallowSphere:" + canSphere);
                 pw.close();
                 log.info("[VoxelMimic] Config saved");
             }
@@ -173,6 +181,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
                     }
                 }
                 usePerms = Boolean.parseBoolean(snr.nextLine().split(":")[1]);
+                canSphere = Boolean.parseBoolean(snr.nextLine().split(":")[1]);
                 snr.close();
                 log.info("[VoxelMimic] Config loaded");
             } else {
@@ -184,16 +193,15 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
         }
     }
 
-    public void performMimic(Player p, int radius) {
-
-
+    public void performMimic(Player p, int radius, boolean sphere) 
+    {
         int freqArray[][] = new int[200][16]; //holder for counts of each blocktype, and 15 durability levels for wool
 
         //get player location
         Location location = p.getLocation();
         int xPos = location.getBlockX();
         int yPos = -1;
-        if (location.getBlockY() - (int) radius / 5 > 0) {//this is a hemispehre the top half of a sphere.  This makes it positioned so you still get some blocks a little below you.
+        if (location.getBlockY() - (int) radius / 5 > 0) {//this is a hemisphere the top half of a sphere.  This makes it positioned so you still get some blocks a little below you.
             yPos = location.getBlockY() - (int) radius / 5;
         } else {
             yPos = location.getBlockY(); //in case player is just barely above bedrock
@@ -221,12 +229,17 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
                             data = 15;
                         }
                         freqArray[w.getBlockTypeIdAt(xPos + x, yPos + y, zPos - z)][data]++;
-                        //data = (w.getBlockAt(xPos + x, yPos - y, zPos + z).getData());
-                        //if (data > 15){data = 15;}
-                        //freqArray[w.getBlockTypeIdAt(xPos + x, yPos - y, zPos + z)][data]++;  //uncomment for full sphere version.
-                        //data = (w.getBlockAt(xPos + x, yPos - y, zPos - z).getData());
-                        //if (data > 15){data = 15;}
-                        //freqArray[w.getBlockTypeIdAt(xPos + x, yPos - y, zPos - z)][data]++;
+                        
+                        if(sphere)
+                        {
+                        	data = (w.getBlockAt(xPos + x, yPos - y, zPos + z).getData());
+                        	if (data > 15){data = 15;}
+                        	freqArray[w.getBlockTypeIdAt(xPos + x, yPos - y, zPos + z)][data]++;  //uncomment for full sphere version.
+                        	data = (w.getBlockAt(xPos + x, yPos - y, zPos - z).getData());
+                        	if (data > 15){data = 15;}
+                        	freqArray[w.getBlockTypeIdAt(xPos + x, yPos - y, zPos - z)][data]++;
+                        }
+                        
                         data = (w.getBlockAt(xPos - x, yPos + y, zPos + z).getData());
                         if (data > 15) {
                             data = 15;
@@ -237,12 +250,15 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
                             data = 15;
                         }
                         freqArray[w.getBlockTypeIdAt(xPos - x, yPos + y, zPos - z)][data]++;
-                        //data = (w.getBlockAt(xPos - x, yPos - y, zPos + z).getData());
-                        //if (data > 15){data = 15;}
-                        //freqArray[w.getBlockTypeIdAt(xPos - x, yPos - y, zPos + z)][data]++;
-                        //data = (w.getBlockAt(xPos - x, yPos - y, zPos - z).getData());
-                        //if (data > 15){data = 15;}
-                        //freqArray[w.getBlockTypeIdAt(xPos - x, yPos - y, zPos - z)][data]++;
+                        if(sphere)
+                        {
+                        	data = (w.getBlockAt(xPos - x, yPos - y, zPos + z).getData());
+                        	if (data > 15){data = 15;}
+                        	freqArray[w.getBlockTypeIdAt(xPos - x, yPos - y, zPos + z)][data]++;
+                        	data = (w.getBlockAt(xPos - x, yPos - y, zPos - z).getData());
+                        	if (data > 15){data = 15;}
+                        	freqArray[w.getBlockTypeIdAt(xPos - x, yPos - y, zPos - z)][data]++;
+                        }
                     }
                 }
             }
@@ -276,7 +292,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
 
         int existId;
         int existDur;
-        boolean[][] skipThis = new boolean[200][36]; //dont give item types you already have in your inventory.  first dim = item id type, second im = data value
+        boolean[][] skipThis = new boolean[200][36]; //don't give item types you already have in your inventory.  first dim = item id type, second dim = data value
         for (int r = 1; r <= 36; r++){
                 ItemStack stack = inv.getItem(r);
                 existId = stack.getTypeId();
