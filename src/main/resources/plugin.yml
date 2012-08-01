@@ -2,7 +2,7 @@ name: VoxelMimic
 main: com.thevoxelbox.voxelmimic.VoxelMimic
 version: 1.43
 website: http://voxelwiki.com
-author: Gavjenks
+authors: [Gavjenks, Spyboticsguy]
 description: >
              Gather a palette based on items in your vicinity.
 commands:
@@ -10,3 +10,7 @@ commands:
     description: Matches your inventory to types of blocks around you
     usage: |
            /mimic [optional: radius] [optional: sphere]
+permissions:
+    voxelmimic.mimic:
+        description: Grants access to the /mimic command.
+        default: op

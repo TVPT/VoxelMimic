@@ -58,7 +58,7 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
         Player player = (Player) sender;
 
         if (commandName.startsWith("mimic") && sender instanceof Player) {
-        	if(usePerms && permValid.checkPlayerPermissions(player, "voxelmimic.mimic"))
+        	if(usePerms && !permValid.checkPlayerPermissions(player, "voxelmimic.mimic"))
         	{
         		player.sendMessage(ChatColor.RED + "You are not permitted to use this command.");
         		return true;
@@ -87,7 +87,6 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
                 } catch (ArrayIndexOutOfBoundsException e) {
                     if (voxelGuest && !voxelGuestMimic && !((vGuests.get(player.getName()) == null)) || (voxelGuest && voxelGuestMimic) || !voxelGuest) {
                         performMimic(player, RADIUS, sphere);
-                        player.sendMessage("himom");
                         return true;
                     } else {
                         player.sendMessage(ChatColor.RED + "You are not permitted to use this command.");
@@ -210,7 +209,6 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
 
         Inventory inv = p.getInventory();
         int data = 0;
-        p.sendMessage("himom2");
         //may want to then use getContents which gives a whole array if stacks, then setContents.
         //get block type frequency within a hemisphere
         for (int x = radius; x >= 0; x--) {
@@ -263,7 +261,6 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
                 }
             }
         }
-        p.sendMessage("himom3");
         for (int k = 0; k <= 199; k++) { //ignore anything specified on config file.  By default, some common natural stuff, and explosives and things.
             if (unmimicable.contains(k)) {
                 for (int l = 0; l <= 15; l++) {
@@ -295,8 +292,8 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
         boolean[][] skipThis = new boolean[200][36]; //don't give item types you already have in your inventory.  first dim = item id type, second dim = data value
         for (int r = 1; r <= 36; r++){
                 ItemStack stack = inv.getItem(r);
-                existId = stack.getTypeId();
-                existDur = stack.getDurability();
+                existId = (stack == null) ? 0 : stack.getTypeId();
+                existDur = (stack == null) ? 0 : stack.getDurability();
                 switch (existId){ //if you have a door item in inventory, don't mimic door BLOCKS, etc.
                         case 331:
                             skipThis[55][0] = true;
@@ -344,9 +341,12 @@ public class VoxelMimic extends JavaPlugin {  // I changed your unmimicable to a
             if (winnerA != 0) { //if winnerA == 0, then that means we are out of new block types that were found during the scan, so stop messing with the inventory.
                 ItemStack stack = inv.getItem(index + 9); //get the stack from inventory we are at right now.
 
-                stack.setTypeId(winnerA); //makes it a stack of the popular type.
+                if (stack != null) {
+                    stack.setTypeId(winnerA);
+                } else {
+                    stack = new ItemStack(winnerA);
+                } //makes it a stack of the popular type.
 
-                p.sendMessage("winner = " + winnerA);
                 if(winnerA == 55 ){
                     stack.setTypeId(331);
                 } //changing various things that should be items instead of blocks.
