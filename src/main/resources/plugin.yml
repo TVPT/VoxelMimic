@@ -10,3 +10,7 @@ commands:
     description: Matches your inventory to types of blocks around you
     usage: |
            /mimic [optional: radius] [optional: sphere]
+permissions:
+    voxelmimic.mimic:
+        description: Grants access to the /mimic command.
+        default: op
