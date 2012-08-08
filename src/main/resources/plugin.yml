@@ -2,7 +2,7 @@ name: VoxelMimic
 main: com.thevoxelbox.voxelmimic.VoxelMimic
 version: 1.43
 website: http://voxelwiki.com
-authors: [Gavjenks, Me4502]
+author: Gavjenks
 description: >
              Gather a palette based on items in your vicinity.
 commands:
